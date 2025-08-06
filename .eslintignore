@@ -1,0 +1,16 @@
+# Auto-generated files
+resources/js/ziggy.js
+
+# Build outputs
+public/build/
+dist/
+
+# Node modules
+node_modules/
+
+# Vendor files
+vendor/
+
+# Generated files
+*.min.js
+*.min.css 
