@@ -28,21 +28,21 @@ return [
     'disks' => [
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app'),
+            'root' => public_path('storage'),
             'throw' => false,
             'report' => false,
         ],
         'private' => [
             'driver' => 'local',
-            'root' => storage_path('app/private'),
+            'root' => public_path('storage/private'),
             'visibility' => 'private',
             'throw' => false,
             'report' => false,
         ],
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => env('APP_URL') . '/storage',
+            'root' => public_path('storage/public'),
+            'url' => env('APP_URL') . '/storage/public',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
