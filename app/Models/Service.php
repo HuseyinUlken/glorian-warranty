@@ -184,6 +184,20 @@ class Service extends Model
     }
 
     /**
+     * Hizmet kodunu doğrula
+     */
+    public static function validateServiceCode(string $code): bool
+    {
+        // 16 karakter kontrolü
+        if (strlen($code) !== 16) {
+            return false;
+        }
+        
+        // Benzersizlik kontrolü
+        return !self::where('service_code', $code)->exists();
+    }
+
+    /**
      * Scope: Bekleyen hizmetler
      */
     public function scopePending($query)

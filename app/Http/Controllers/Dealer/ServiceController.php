@@ -148,9 +148,21 @@ class ServiceController extends Controller
                 ]);
             }
 
+            // Hizmet kodu kontrolü
+            $serviceCode = $request->input('service_code');
+            if ($serviceCode) {
+                if (!Service::validateServiceCode($serviceCode)) {
+                    return back()->withErrors([
+                        'service_code' => 'Geçersiz hizmet kodu. 16 karakter olmalı ve benzersiz olmalıdır.'
+                    ]);
+                }
+            } else {
+                $serviceCode = Service::generateServiceCode();
+            }
+
             // Hizmet oluştur
             $service = Service::create([
-                'service_code' => Service::generateServiceCode(),
+                'service_code' => $serviceCode,
                 'dealer_id' => $dealer->id,
                 'customer_id' => $customer->id,
                 'vehicle_make' => $request->input('vehicle.make'),

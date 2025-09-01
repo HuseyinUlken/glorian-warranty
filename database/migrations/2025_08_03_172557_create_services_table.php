@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('services', function (Blueprint $table) {
             $table->id();
-            $table->string('service_code', 16)->unique();  // 16 haneli benzersiz kod
+            $table->string('service_code', 16)->nullable()->unique();  // 16 haneli benzersiz kod (opsiyonel)
             $table->foreignId('dealer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
 
