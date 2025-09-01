@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,6 +28,11 @@ export default function GlorianLandingPage() {
               <Button variant="outline" size="sm">
                 İletişim
               </Button>
+              <Link href={route("login")}>
+                <Button variant="default" size="sm">
+                  Bayi Girişi
+                </Button>
+              </Link>
             </nav>
           </div>
         </header>
