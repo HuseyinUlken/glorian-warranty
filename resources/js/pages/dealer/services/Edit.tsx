@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { PermissionGuard } from '@/lib/permission/PermissionGuard';
 import Permissions from '@/lib/permission/modulePermissions';
@@ -83,9 +84,12 @@ export default function EditService({ service, products }: EditServiceProps) {
         applied_areas: string[];
         notes?: string;
     }>>([]);
+    
+    const [serviceCode, setServiceCode] = useState(service.service_code);
 
     const { data, setData, post, processing, errors } = useForm({
         _method: 'PUT',
+        service_code: service.service_code,
         application_date: service.application_date,
         customer: {
             first_name: service.customer.first_name,
@@ -151,6 +155,7 @@ export default function EditService({ service, products }: EditServiceProps) {
         // Form data'yı hazırla
         const formData = {
             ...data,
+            service_code: serviceCode,
             applied_products: validProducts,
         };
 
@@ -181,11 +186,27 @@ export default function EditService({ service, products }: EditServiceProps) {
         setSelectedProducts(updated);
     };
 
-    const appliedAreasOptions = [
-        'Kaput', 'Ön Çamurluk Sol', 'Ön Çamurluk Sağ', 'Ön Kapı Sol', 'Ön Kapı Sağ',
-        'Arka Kapı Sol', 'Arka Kapı Sağ', 'Arka Çamurluk Sol', 'Arka Çamurluk Sağ',
-        'Bagaj Kapağı', 'Tavan', 'Ön Tampon', 'Arka Tampon', 'Ayna Sol', 'Ayna Sağ'
-    ];
+    // Kategori bazlı alan seçeneklerini getir
+    const getAppliedAreasOptions = (productId: number) => {
+        const product = products.find(p => p.id === productId);
+        if (!product) return [];
+        
+        switch (product.category.value) {
+            case 'PPF':
+                return [
+                    'Kaput', 'Ön Çamurluk Sol', 'Ön Çamurluk Sağ', 'Ön Kapı Sol', 'Ön Kapı Sağ',
+                    'Arka Kapı Sol', 'Arka Kapı Sağ', 'Arka Çamurluk Sol', 'Arka Çamurluk Sağ',
+                    'Bagaj Kapağı', 'Tavan', 'Ön Tampon', 'Arka Tampon'
+                ];
+            case 'CAM_FILMI':
+                return [
+                    'Ön Cam', 'Arka Cam', 'Yan Cam Sol Ön', 'Yan Cam Sağ Ön', 
+                    'Yan Cam Sol Arka', 'Yan Cam Sağ Arka', 'Tavan Camı'
+                ];
+            default:
+                return [];
+        }
+    };
 
     return (
         <AppLayout breadcrumbs={getBreadcrumbs(service)}>
@@ -388,6 +409,23 @@ export default function EditService({ service, products }: EditServiceProps) {
                                 {/* Hizmet Bilgileri */}
                                 <div className="space-y-4">
                                     <h4 className="font-medium">Hizmet Bilgileri</h4>
+                                    
+                                    <div className="space-y-2">
+                                        <Label htmlFor="service_code">Hizmet Kodu</Label>
+                                        <Input
+                                            id="service_code"
+                                            value={serviceCode}
+                                            onChange={(e) => setServiceCode(e.target.value.toUpperCase())}
+                                            placeholder="16 haneli kod"
+                                            maxLength={16}
+                                            pattern="[A-Z0-9]{16}"
+                                        />
+                                        <p className="text-sm text-muted-foreground">
+                                            {serviceCode.length}/16 karakter
+                                        </p>
+                                        {errors.service_code && <p className="text-sm text-red-500">{errors.service_code}</p>}
+                                    </div>
+                                    
                                     <div className="space-y-2">
                                         <Label htmlFor="application_date">Başvuru Tarihi *</Label>
                                         <Input
@@ -452,7 +490,7 @@ export default function EditService({ service, products }: EditServiceProps) {
                                                                     <SelectValue placeholder="Alan seçin" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
-                                                                    {appliedAreasOptions.map((area) => (
+                                                                    {getAppliedAreasOptions(product.product_id).map((area) => (
                                                                         <SelectItem key={area} value={area}>
                                                                             {area}
                                                                         </SelectItem>
@@ -462,9 +500,10 @@ export default function EditService({ service, products }: EditServiceProps) {
                                                             {Array.isArray(product.applied_areas) && product.applied_areas.length > 0 && (
                                                                 <div className="flex flex-wrap gap-1">
                                                                     {product.applied_areas.map((area, areaIndex) => (
-                                                                        <span
+                                                                        <Badge
                                                                             key={areaIndex}
-                                                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full"
+                                                                            variant="secondary"
+                                                                            className="inline-flex items-center gap-1"
                                                                         >
                                                                             {area}
                                                                             <button
@@ -473,11 +512,11 @@ export default function EditService({ service, products }: EditServiceProps) {
                                                                                     const updatedAreas = product.applied_areas.filter((_, i) => i !== areaIndex);
                                                                                     updateProduct(index, 'applied_areas', updatedAreas);
                                                                                 }}
-                                                                                className="ml-1 text-blue-600 hover:text-blue-800"
+                                                                                className="ml-1 hover:text-destructive"
                                                                             >
                                                                                 ×
                                                                             </button>
-                                                                        </span>
+                                                                        </Badge>
                                                                     ))}
                                                                 </div>
                                                             )}
