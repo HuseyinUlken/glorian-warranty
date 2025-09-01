@@ -12,11 +12,11 @@ export default function Heading({ title, description, buttons }: { title: string
             </div>
 
             {/* Desktop view - buttons displayed normally */}
-            {buttons && <div className="hidden lg:flex lg:justify-end lg:gap-2">{buttons}</div>}
+            {buttons && <div className="flex justify-end gap-2">{buttons}</div>}
 
             {/* Mobile view - drawer implementation */}
             {buttons && (
-                <div className="flex justify-end lg:hidden">
+                <div className="hidden">
                     <Sheet>
                         <SheetTrigger asChild>
                             <Button variant="outline" size="sm">
