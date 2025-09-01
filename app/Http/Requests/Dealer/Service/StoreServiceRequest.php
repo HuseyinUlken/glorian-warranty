@@ -50,13 +50,13 @@ class StoreServiceRequest extends FormRequest
                     $productIndex = explode('.', $attribute)[1];
                     $productId = $this->input("applied_products.{$productIndex}.product_id");
                     $product = \App\Models\Product::find($productId);
-                    
+
                     if ($product) {
                         $allowedAreas = $this->getAllowedAreasForCategory($product->category);
                         $invalidAreas = array_diff($value, $allowedAreas);
-                        
+
                         if (!empty($invalidAreas)) {
-                            $fail("Seçilen ürün kategorisi için geçersiz alanlar: " . implode(', ', $invalidAreas));
+                            $fail('Seçilen ürün kategorisi için geçersiz alanlar: ' . implode(', ', $invalidAreas));
                         }
                     }
                 }
@@ -102,16 +102,9 @@ class StoreServiceRequest extends FormRequest
     private function getAllowedAreasForCategory($category): array
     {
         return match ($category) {
-            \App\Enums\ProductCategoryEnum::PPF => [
-                'Kaput', 'Ön Çamurluk Sol', 'Ön Çamurluk Sağ', 'Ön Kapı Sol', 'Ön Kapı Sağ',
-                'Arka Kapı Sol', 'Arka Kapı Sağ', 'Arka Çamurluk Sol', 'Arka Çamurluk Sağ',
-                'Bagaj Kapağı', 'Tavan', 'Ön Tampon', 'Arka Tampon'
-            ],
-            \App\Enums\ProductCategoryEnum::CAM_FILMI => [
-                'Ön Cam', 'Arka Cam', 'Yan Cam Sol Ön', 'Yan Cam Sağ Ön', 
-                'Yan Cam Sol Arka', 'Yan Cam Sağ Arka', 'Tavan Camı'
-            ],
+            \App\Enums\ProductCategoryEnum::PPF => ['Kaput', 'Ön Çamurluk Sol', 'Ön Çamurluk Sağ', 'Ön Kapı Sol', 'Ön Kapı Sağ', 'Arka Kapı Sol', 'Arka Kapı Sağ', 'Arka Çamurluk Sol', 'Arka Çamurluk Sağ', 'Bagaj Kapağı', 'Tavan', 'Ön Tampon', 'Arka Tampon'],
+            \App\Enums\ProductCategoryEnum::CAM_FILMI => ['Ön Cam', 'Arka Cam', 'Yan Cam Sol Ön', 'Yan Cam Sağ Ön', 'Yan Cam Sol Arka', 'Yan Cam Sağ Arka', 'Tavan Camı'],
             default => []
-        ];
+        };
     }
 }
