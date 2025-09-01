@@ -1,1 +1,0 @@
-import{j as o}from"./app-CtSmOnty.js";import{c as r}from"./createLucideIcon-BH5sZu6J.js";function m({className:t,...e}){return o.jsx("div",{"data-slot":"skeleton",className:r("bg-primary/10 animate-pulse rounded-md",t),...e})}export{m as S};
