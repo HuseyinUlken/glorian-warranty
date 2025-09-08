@@ -1,12 +1,43 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Shield, Sparkles, Clock } from "lucide-react"
 
+
 export default function GlorianLandingPage() {
-  return (
-    <>
+  const [serviceCode, setServiceCode] = useState('');
+  const [serviceCodeBottom, setServiceCodeBottom] = useState('');
+  const [error, setError] = useState('');
+
+
+   const handleTopSearch = (e: React.FormEvent) => {
+     e.preventDefault();
+     if (serviceCode && serviceCode.length === 16) {
+       router.visit(`/warranty/${serviceCode}`);
+     } else {
+       setError('Hizmet kodu 16 karakter olmalıdır.');
+     }
+   };
+ 
+   const handleBottomSearch = (e: React.FormEvent) => {
+     e.preventDefault();
+     if (serviceCodeBottom && serviceCodeBottom.length === 16) {
+       router.visit(`/warranty/${serviceCodeBottom}`);
+     } else {
+       setError('Hizmet kodu 16 karakter olmalıdır.');
+     }
+   };
+
+  const clearError = () => {
+    setError('');
+    setServiceCode('');
+    setServiceCodeBottom('');
+  };
+
+    return (
+        <>
       <Head title="Glorian - Görünmez Kalkan, Sonsuz Parlaklık" />
       <div className="min-h-screen bg-background">
         {/* Header */}
@@ -54,10 +85,22 @@ export default function GlorianLandingPage() {
                 {/* Warranty Lookup */}
                 <div className="bg-card p-6 rounded-lg border border-border space-y-4">
                   <h3 className="text-lg font-semibold text-card-foreground">Garanti Sorgulama</h3>
-                  <div className="flex gap-3">
-                    <Input placeholder="16 haneli garanti kodunuzu girin" className="flex-1" maxLength={16} />
-                    <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">Sorgula</Button>
-                  </div>
+                  <form onSubmit={handleTopSearch} className="flex gap-3">
+                    <Input 
+                      placeholder="16 haneli garanti kodunuzu girin" 
+                      className="flex-1 text-center font-mono" 
+                      maxLength={16}
+                      value={serviceCode}
+                      onChange={(e) => setServiceCode(e.target.value.toUpperCase())}
+                    />
+                     <Button 
+                       type="submit"
+                       disabled={serviceCode.length !== 16}
+                       className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                     >
+                       Sorgula
+                     </Button>
+                  </form>
                   <p className="text-sm text-muted-foreground">Garanti kodunuz ile ürününüzün durumunu anında öğrenin</p>
                 </div>
               </div>
@@ -205,16 +248,44 @@ export default function GlorianLandingPage() {
               </p>
 
               <div className="bg-card p-8 rounded-lg border border-border max-w-md mx-auto">
-                <div className="space-y-4">
-                  <Input placeholder="Garanti kodunuzu girin" className="text-center" maxLength={16} />
-                  <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                    Garanti Sorgula
-                  </Button>
-                </div>
+                <form onSubmit={handleBottomSearch} className="space-y-4">
+                  <Input 
+                    placeholder="Garanti kodunuzu girin" 
+                    className="text-center font-mono" 
+                    maxLength={16}
+                    value={serviceCodeBottom}
+                    onChange={(e) => setServiceCodeBottom(e.target.value.toUpperCase())}
+                  />
+                   <Button 
+                     type="submit"
+                     disabled={serviceCodeBottom.length !== 16}
+                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                   >
+                     Garanti Sorgula
+                   </Button>
+                </form>
               </div>
             </div>
           </div>
         </section>
+
+        {/* Error Display */}
+        {error && (
+          <section className="py-8 bg-red-50">
+            <div className="container mx-auto px-4">
+              <div className="max-w-2xl mx-auto">
+                <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded">
+                  {error}
+                </div>
+                <div className="text-center mt-4">
+                  <Button onClick={clearError} variant="outline">
+                    Yeni Sorgu Yap
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Footer */}
         <footer className="border-t border-border bg-muted/30 py-12">
@@ -295,6 +366,6 @@ export default function GlorianLandingPage() {
           </div>
         </footer>
       </div>
-    </>
-  );
+        </>
+    );
 }

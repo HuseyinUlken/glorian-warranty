@@ -9,6 +9,7 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
         <meta name="apple-mobile-web-app-title" content="Glorian">
         <meta name="description" content="Glorian">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         
         <!-- PWA Manifest -->
         <link rel="manifest" href="/manifest.json">

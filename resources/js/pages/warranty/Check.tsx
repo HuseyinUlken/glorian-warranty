@@ -1,297 +1,207 @@
-import { Head } from '@inertiajs/react';
-import { Search, Car, User, Building, Package, Shield, Calendar, AlertCircle } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Search, Shield, Home, ArrowRight, CheckCircle, Sparkles, Clock } from 'lucide-react';
+import { useState } from 'react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Service } from '@/types/service';
 
-interface WarrantyCheckProps {
-    service?: Service;
-    error?: string;
-}
+export default function WarrantyCheck() {
+  const [serviceCode, setServiceCode] = useState('');
+  const [error, setError] = useState('');
 
-export default function WarrantyCheck({ service, error }: WarrantyCheckProps) {
-    return (
-        <>
-            <Head title="Garanti Sorgulama" />
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-4xl mx-auto">
-                    {/* Header */}
-                    <div className="text-center mb-8">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                            Garanti Sorgulama
-                        </h1>
-                        <p className="text-lg text-gray-600">
-                            Hizmet kodunuzu girerek garanti durumunuzu sorgulayabilirsiniz
-                        </p>
-                    </div>
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
 
-                    {/* Search Form */}
-                    <Card className="mb-8">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Search className="h-5 w-5" />
-                                Garanti Sorgula
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <form method="POST" action={route('warranty.check')} className="flex gap-4">
-                                <div className="flex-1">
-                                    <Label htmlFor="serviceCode" className="sr-only">
-                                        Hizmet Kodu
-                                    </Label>
-                                    <Input
-                                        id="serviceCode"
-                                        name="service_code"
-                                        type="text"
-                                        placeholder="Hizmet kodunuzu giriniz (örn: ABCDEFGHIJKLMNOP)"
-                                        className="text-center text-lg font-mono"
-                                        maxLength={16}
-                                        required
-                                    />
-                                </div>
-                                <Button type="submit" size="lg">
-                                    <Search className="mr-2 h-4 w-4" />
-                                    Sorgula
-                                </Button>
-                            </form>
-                        </CardContent>
-                    </Card>
+    if (!serviceCode || serviceCode.length !== 16) {
+      setError('Garanti kodu 16 karakter olmalıdır.');
+      return;
+    }
 
-                    {/* Error Message */}
-                    {error && (
-                        <Alert className="mb-8">
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                    )}
+    // Yeni sisteme göre direkt URL'ye yönlendir
+    router.visit(`/warranty/${serviceCode}`);
+  };
 
-                    {/* Service Details */}
-                    {service && (
-                        <div className="space-y-6">
-                            {/* Service Summary */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Shield className="h-5 w-5" />
-                                        Garanti Durumu
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        <div className="text-center p-4 bg-blue-50 rounded-lg">
-                                            <div className="text-sm font-medium text-blue-600">Hizmet Kodu</div>
-                                            <div className="text-2xl font-bold font-mono">{service.service_code}</div>
-                                        </div>
-                                        <div className="text-center p-4 bg-green-50 rounded-lg">
-                                            <div className="text-sm font-medium text-green-600">Durum</div>
-                                            <Badge 
-                                                variant={service.status.value === 'ACTIVE' ? 'default' : 'secondary'}
-                                                className={`bg-${service.status.color}-500 text-white text-lg px-4 py-2`}
-                                            >
-                                                {service.status.label}
-                                            </Badge>
-                                        </div>
-                                        <div className="text-center p-4 bg-purple-50 rounded-lg">
-                                            <div className="text-sm font-medium text-purple-600">Başvuru Tarihi</div>
-                                            <div className="text-lg font-bold">{service.application_date}</div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+  const clearForm = () => {
+    setServiceCode('');
+    setError('');
+  };
 
-                            {/* Warranty Information */}
-                            {service.warranty.start_date && (
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Calendar className="h-5 w-5" />
-                                            Garanti Bilgileri
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                            <div className="text-center p-4 bg-blue-50 rounded-lg">
-                                                <div className="text-sm font-medium text-blue-600">Başlangıç Tarihi</div>
-                                                <div className="text-lg font-bold">{service.warranty.start_date}</div>
-                                            </div>
-                                            <div className="text-center p-4 bg-green-50 rounded-lg">
-                                                <div className="text-sm font-medium text-green-600">Bitiş Tarihi</div>
-                                                <div className="text-lg font-bold">{service.warranty.end_date}</div>
-                                            </div>
-                                            {service.warranty.days_remaining !== null && (
-                                                <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                                                    <div className="text-sm font-medium text-yellow-600">Kalan Gün</div>
-                                                    <div className="text-lg font-bold">{service.warranty.days_remaining}</div>
-                                                </div>
-                                            )}
-                                            {service.warranty.percentage_remaining !== null && (
-                                                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                                                    <div className="text-sm font-medium text-purple-600">Kalan %</div>
-                                                    <div className="text-lg font-bold">%{service.warranty.percentage_remaining.toFixed(1)}</div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            )}
-
-                            {/* Customer Information */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <User className="h-5 w-5" />
-                                        Müşteri Bilgileri
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <div className="text-sm font-medium text-gray-500">Ad Soyad</div>
-                                            <div className="text-lg font-semibold">{service.customer.full_name}</div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-gray-500">Telefon</div>
-                                            <div className="text-lg">{service.customer.phone}</div>
-                                        </div>
-                                        {service.customer.email && (
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-500">E-posta</div>
-                                                <div className="text-lg">{service.customer.email}</div>
-                                            </div>
-                                        )}
-                                        {service.customer.full_address && (
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-500">Adres</div>
-                                                <div className="text-lg">{service.customer.full_address}</div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Dealer Information */}
-                            {service.dealer && (
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Building className="h-5 w-5" />
-                                            Bayi Bilgileri
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-500">Bayi Adı</div>
-                                                <div className="text-lg font-semibold">{service.dealer.name}</div>
-                                            </div>
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-500">E-posta</div>
-                                                <div className="text-lg">{service.dealer.email}</div>
-                                            </div>
-                                            {service.dealer.phone && (
-                                                <div>
-                                                    <div className="text-sm font-medium text-gray-500">Telefon</div>
-                                                    <div className="text-lg">{service.dealer.phone}</div>
-                                                </div>
-                                            )}
-                                            {(service.dealer.city || service.dealer.district) && (
-                                                <div>
-                                                    <div className="text-sm font-medium text-gray-500">Konum</div>
-                                                    <div className="text-lg">
-                                                        {service.dealer.city}
-                                                        {service.dealer.district && `, ${service.dealer.district}`}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            )}
-
-                            {/* Vehicle Information */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Car className="h-5 w-5" />
-                                        Araç Bilgileri
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        <div>
-                                            <div className="text-sm font-medium text-gray-500">Araç</div>
-                                            <div className="text-lg font-semibold">{service.vehicle.full_name}</div>
-                                        </div>
-                                        {service.vehicle.plate && (
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-500">Plaka</div>
-                                                <div className="text-lg">{service.vehicle.plate}</div>
-                                            </div>
-                                        )}
-                                        {service.vehicle.color && (
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-500">Renk</div>
-                                                <div className="text-lg">{service.vehicle.color}</div>
-                                            </div>
-                                        )}
-                                        {service.vehicle.package && (
-                                            <div>
-                                                <div className="text-sm font-medium text-gray-500">Paket</div>
-                                                <div className="text-lg">{service.vehicle.package}</div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Applied Products */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Package className="h-5 w-5" />
-                                        Uygulanan Ürünler
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        {service.applied_products.map((product, index) => (
-                                            <div key={index} className="border rounded-lg p-4">
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <h4 className="font-medium">{product.name}</h4>
-                                                            <Badge 
-                                                                variant="outline"
-                                                                className={`border-${product.category.color}-200 text-${product.category.color}-700 bg-${product.category.color}-50`}
-                                                            >
-                                                                {product.category.label}
-                                                            </Badge>
-                                                        </div>
-                                                        <div className="text-sm text-gray-600 mb-2">
-                                                            Uygulanan Alanlar: {product.applied_areas.join(', ')}
-                                                        </div>
-                                                        {product.notes && (
-                                                            <div className="text-sm">
-                                                                <div className="font-medium">Notlar:</div>
-                                                                <div className="text-gray-600">{product.notes}</div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    )}
-                </div>
+  return (
+    <>
+      <Head title="Garanti Sorgulama - Glorian" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        {/* Header */}
+        <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              <img src="/logos/glorian-light-logo.svg" alt="Glorian" className="h-8 w-auto" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Home className="h-4 w-4" />
+                  Ana Sayfa
+                </Button>
+              </Link>
+              <Link href={route("login")}>
+                <Button size="sm">
+                  Bayi Girişi
+                </Button>
+              </Link>
             </div>
-        </>
-    );
-} 
+          </div>
+        </header>
+
+        <main className="container mx-auto px-4 py-12">
+          <div className="max-w-2xl mx-auto">
+            {/* Header */}
+            <div className="text-center space-y-6 mb-12">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full">
+                <Shield className="h-5 w-5" />
+                <span className="font-medium">Garanti Sorgulama</span>
+              </div>
+              
+              <h1 className="text-4xl lg:text-5xl font-bold text-slate-900">
+                Garanti Durumunuzu <br />
+                <span className="text-primary">Hemen Öğrenin</span>
+              </h1>
+              
+              <p className="text-xl text-slate-600 max-w-lg mx-auto">
+                16 haneli garanti kodunuzu girerek ürününüzün detaylı garanti bilgilerine ulaşabilirsiniz.
+              </p>
+            </div>
+
+            {/* Search Form */}
+            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+                  <Search className="h-6 w-6 text-primary" />
+                  Garanti Kodu Sorgulama
+                </CardTitle>
+                <p className="text-slate-600 mt-2">
+                  Garanti kodunuz genellikle servis belgelerinizde yer alır
+                </p>
+              </CardHeader>
+              
+              <CardContent className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Input
+                      type="text"
+                      placeholder="ABCD1234EFGH5678"
+                      className="text-center text-xl font-mono h-14 text-slate-900 placeholder:text-slate-400"
+                      maxLength={16}
+                      value={serviceCode}
+                      onChange={(e) => setServiceCode(e.target.value.toUpperCase())}
+                      autoFocus
+                    />
+                    <div className="text-center">
+                      <span className="text-sm text-slate-500">
+                        {serviceCode.length}/16 karakter
+                      </span>
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-center">
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <Button
+                      type="submit"
+                      disabled={serviceCode.length !== 16}
+                      className="flex-1 h-12 text-lg gap-2"
+                    >
+                      <Search className="h-5 w-5" />
+                      Garanti Sorgula
+                    </Button>
+                    {serviceCode && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={clearForm}
+                        className="h-12 px-6"
+                      >
+                        Temizle
+                      </Button>
+                    )}
+                  </div>
+                </form>
+
+                {/* Info Cards */}
+                <div className="grid gap-4 mt-8">
+                  <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <div className="font-medium text-blue-900">Hızlı Sorgulama</div>
+                      <div className="text-sm text-blue-700">
+                        Garanti kodunuz ile anında sonuç alın
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
+                    <Shield className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <div className="font-medium text-green-900">Güvenli Sistem</div>
+                      <div className="text-sm text-green-700">
+                        Verileriniz güvenli bir şekilde sorgulanır
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-lg">
+                    <Sparkles className="h-5 w-5 text-purple-600 mt-0.5" />
+                    <div>
+                      <div className="font-medium text-purple-900">Detaylı Bilgi</div>
+                      <div className="text-sm text-purple-700">
+                        Garanti durumu, tarihler ve uygulanan ürünler
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Help Section */}
+            <div className="text-center mt-12 space-y-4">
+              <h3 className="text-lg font-semibold text-slate-900">
+                Garanti kodunuzu bulamıyor musunuz?
+              </h3>
+              <p className="text-slate-600">
+                Garanti kodunuz genellikle servis teslim belgelerinizde, 
+                fatura üzerinde veya size gönderilen SMS/e-posta'da bulunur.
+              </p>
+              <div className="flex justify-center gap-4 mt-6">
+                <Link href="/">
+                  <Button variant="outline" className="gap-2">
+                    <Home className="h-4 w-4" />
+                    Ana Sayfa
+                  </Button>
+                </Link>
+                <Button variant="outline" className="gap-2">
+                  <ArrowRight className="h-4 w-4" />
+                  Yardım
+                </Button>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-slate-200 bg-white mt-16">
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center text-sm text-slate-600">
+              <p>© 2024 Glorian. Tüm hakları saklıdır.</p>
+              <p className="mt-2">Garanti sorgulama sistemi</p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </>
+  );
+}

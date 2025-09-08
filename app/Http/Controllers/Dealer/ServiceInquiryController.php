@@ -24,7 +24,7 @@ class ServiceInquiryController extends Controller
      */
     public function index()
     {
-        $authResult = $this->authorize('view_own');
+        $authResult = $this->authorize('view_own', 'service.view_own');
         if ($authResult !== true) {
             return $authResult;
         }
@@ -37,7 +37,7 @@ class ServiceInquiryController extends Controller
      */
     public function search(Request $request)
     {
-        $authResult = $this->authorize('view_own');
+        $authResult = $this->authorize('view_own', 'service.view_own');
         if ($authResult !== true) {
             return $authResult;
         }
@@ -66,19 +66,20 @@ class ServiceInquiryController extends Controller
             ->first();
 
         if (!$service) {
-            return redirect()->route('dealer.service-inquiry.index')->withErrors([
+            return back()->withErrors([
                 'service_code' => 'Bu hizmet kodu ile kayıt bulunamadı.'
             ]);
         }
 
         // Bayinin sadece kendi hizmetlerini görebilmesini sağla
         if ($service->dealer_id !== $dealer->id) {
-            return redirect()->route('dealer.service-inquiry.index')->withErrors([
+            return back()->withErrors([
                 'service_code' => 'Bu hizmet size ait değil.'
             ]);
         }
 
-        return Inertia::render('dealer/service-inquiry/Result', [
+        // Aynı sayfaya service data'sı ile geri dön
+        return Inertia::render('dealer/service-inquiry/Index', [
             'service' => (new ServiceResource($service))->resolve(),
         ]);
     }
@@ -88,7 +89,7 @@ class ServiceInquiryController extends Controller
      */
     public function apiSearch(Request $request)
     {
-        $authResult = $this->authorize('view_own');
+        $authResult = $this->authorize('view_own', 'service.view_own');
         if ($authResult !== true) {
             return response()->json([
                 'success' => false,
@@ -144,7 +145,7 @@ class ServiceInquiryController extends Controller
      */
     public function addNote(Request $request, Service $service)
     {
-        $authResult = $this->authorize('add_note');
+        $authResult = $this->authorize('add_note', 'service.add_note');
         if ($authResult !== true) {
             return $authResult;
         }
@@ -160,11 +161,20 @@ class ServiceInquiryController extends Controller
             'type' => 'required|in:INFO,WARNING,ERROR,SUCCESS',
         ]);
 
-        $service->notes()->create([
+        $note = $service->notes()->create([
             'user_id' => auth()->id(),
             'content' => $request->content,
             'type' => $request->type,
         ]);
+
+        // AJAX request için JSON response döndür
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Not başarıyla eklendi.',
+                'note' => $note
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Not başarıyla eklendi.');
     }

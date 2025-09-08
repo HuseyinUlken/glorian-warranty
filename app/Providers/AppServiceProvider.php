@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\WarrantyStarted;
+use App\Listeners\SendWarrantyStartedSms;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,5 +23,12 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void {}
+    public function boot(): void
+    {
+        // Event listener devre dışı - SMS artık direkt service içinde gönderiliyor
+        // Event::listen(
+        //     WarrantyStarted::class,
+        //     SendWarrantyStartedSms::class
+        // );
+    }
 }

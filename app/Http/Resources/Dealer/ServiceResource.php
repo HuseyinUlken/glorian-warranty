@@ -88,6 +88,15 @@ class ServiceResource extends JsonResource
                 }
                 return $this->notes->count();
             }),
+            'application_date' => $this->application_date?->format('d.m.Y'),
+            'dealer' => [
+                'id' => $this->dealer->id,
+                'name' => $this->dealer->name,
+                'city' => $this->dealer->city,
+                'district' => $this->dealer->district,
+                'phone' => $this->dealer->phone,
+                'email' => $this->dealer->user->email ?? null,
+            ],
             'created_at' => $this->created_at?->format('d.m.Y H:i'),
             'updated_at' => $this->updated_at?->format('d.m.Y H:i'),
         ];

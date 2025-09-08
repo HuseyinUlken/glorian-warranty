@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Enums\ServiceStatusEnum;
-use App\Notifications\ServiceStatusChangedNotification;
+use App\Events\WarrantyStarted;
+use App\Services\VatanSmsService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -149,6 +151,9 @@ class Service extends Model
             'warranty_end_date' => $this->calculateWarrantyEndDate(),
         ]);
 
+        // SMS gönderimini direkt burada yap (event sistemi yerine)
+        $this->sendWarrantyStartedSms();
+
         return true;
     }
 
@@ -222,6 +227,145 @@ class Service extends Model
     }
 
     /**
+     * Garanti başlatıldığında SMS gönder
+     */
+    private function sendWarrantyStartedSms(): void
+    {
+        try {
+            $customer = $this->customer;
+            $dealer = $this->dealer;
+
+            // Müşteriye SMS gönder
+            if ($customer && $customer->phone) {
+                $this->sendCustomerSms($customer);
+            }
+
+            // Bayiye SMS gönder
+            if ($dealer && $dealer->phone) {
+                $this->sendDealerSms($dealer, $customer);
+            }
+
+        } catch (\Exception $e) {
+            Log::error("SMS gönderiminde hata", [
+                'service_code' => $this->service_code,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Müşteriye SMS gönder
+     */
+    private function sendCustomerSms($customer): void
+    {
+        try {
+            // Garanti detay sayfasının URL'ini oluştur
+            $warrantyUrl = url("/warranty/{$this->service_code}");
+            
+            // URL'yi kısalt
+            $shortUrl = VatanSmsService::shortenUrl($warrantyUrl);
+            if (!$shortUrl) {
+                $shortUrl = $warrantyUrl;
+            }
+
+            // SMS mesajını oluştur
+            $message = $this->buildCustomerMessage($customer, $shortUrl);
+
+            // SMS gönder
+            $result = VatanSmsService::sendSingleSms(
+                $customer->phone,
+                $message,
+                'turkce',
+                'bilgi'
+            );
+
+            Log::info("Müşteri SMS gönderildi", [
+                'service_code' => $this->service_code,
+                'customer_phone' => $customer->phone,
+                'short_url' => $shortUrl,
+                'result' => $result,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Müşteri SMS hatası", [
+                'service_code' => $this->service_code,
+                'customer_phone' => $customer->phone,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Bayiye SMS gönder
+     */
+    private function sendDealerSms($dealer, $customer): void
+    {
+        try {
+            // SMS mesajını oluştur
+            $message = $this->buildDealerMessage($dealer, $customer);
+
+            // SMS gönder
+            $result = VatanSmsService::sendSingleSms(
+                $dealer->phone,
+                $message,
+                'turkce',
+                'bilgi'
+            );
+
+            Log::info("Bayi SMS gönderildi", [
+                'service_code' => $this->service_code,
+                'dealer_phone' => $dealer->phone,
+                'result' => $result,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Bayi SMS hatası", [
+                'service_code' => $this->service_code,
+                'dealer_phone' => $dealer->phone,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Müşteri SMS mesajını oluştur
+     */
+    private function buildCustomerMessage($customer, string $shortUrl): string
+    {
+        $customerName = $customer->full_name ?? 'Değerli Müşterimiz';
+        $vehicleName = $this->vehicle_full_name;
+        $serviceCode = $this->service_code;
+        $warrantyEndDate = $this->warranty_end_date?->format('d.m.Y') ?? 'Belirlenmedi';
+
+        return "Merhaba {$customerName},\n\n" .
+               "🚗 {$vehicleName} aracınız için Glorian garanti koruması başlatılmıştır.\n\n" .
+               "📋 Garanti Kodu: {$serviceCode}\n" .
+               "📅 Garanti Bitiş: {$warrantyEndDate}\n\n" .
+               "🔗 Garanti detaylarınızı görüntülemek için: {$shortUrl}\n\n" .
+               "Glorian ile aracınız güvende!\n" .
+               "Glorian Garanti Sistemi";
+    }
+
+    /**
+     * Bayi SMS mesajını oluştur
+     */
+    private function buildDealerMessage($dealer, $customer): string
+    {
+        $customerName = $customer->full_name ?? 'Bilinmeyen';
+        $vehicleName = $this->vehicle_full_name;
+        $serviceCode = $this->service_code;
+        $dealerName = $dealer->name;
+
+        return "Merhaba {$dealerName},\n\n" .
+               "✅ Garanti başlatma işlemi tamamlandı:\n\n" .
+               "👤 Müşteri: {$customerName}\n" .
+               "🚗 Araç: {$vehicleName}\n" .
+               "📋 Kod: {$serviceCode}\n\n" .
+               "Müşteriye bilgilendirme SMS'i gönderilmiştir.\n\n" .
+               "Glorian Bayi Paneli";
+    }
+
+    /**
      * Model boot metodu - durum değişikliklerinde mail gönder
      */
     protected static function boot()
@@ -234,23 +378,6 @@ class Service extends Model
                 $oldStatus = $service->getOriginal('status');
                 $newStatus = $service->status;
 
-                // Müşteriye mail gönder
-                if ($service->customer && $service->customer->email) {
-                    $service->customer->notify(new ServiceStatusChangedNotification(
-                        $service,
-                        $oldStatus,
-                        $newStatus
-                    ));
-                }
-
-                // Bayiye mail gönder (eğer bayi email'i varsa)
-                if ($service->dealer && $service->dealer->email) {
-                    $service->dealer->notify(new ServiceStatusChangedNotification(
-                        $service,
-                        $oldStatus,
-                        $newStatus
-                    ));
-                }
             }
         });
     }

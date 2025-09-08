@@ -121,5 +121,14 @@ return [
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],
+        'sms' => [
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'handler' => StreamHandler::class,
+            'with' => [
+                'stream' => storage_path('logs/sms.log'),
+            ],
+            'processors' => [PsrLogMessageProcessor::class],
+        ],
     ],
 ];

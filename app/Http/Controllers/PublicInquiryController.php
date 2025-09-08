@@ -46,7 +46,39 @@ class PublicInquiryController extends Controller
         }
 
         return Inertia::render('warranty/Result', [
-            'service' => new ServiceInquiryResource($service),
+            'service' => (new ServiceInquiryResource($service))->resolve(),
+        ]);
+    }
+
+    /**
+     * URL'den kod ile garanti detayını göster
+     */
+    public function show(string $code)
+    {
+        // Kod formatını kontrol et
+        if (strlen($code) !== 16 || !preg_match('/^[A-Z0-9]{16}$/', strtoupper($code))) {
+            abort(404, 'Geçersiz garanti kodu formatı.');
+        }
+
+        $service = Service::with([
+            'dealer.user',
+            'customer',
+            'appliedProducts',
+            'notes.user'
+        ])
+            ->where('service_code', strtoupper($code))
+            ->first();
+
+        if (!$service) {
+            abort(404, 'Bu garanti kodu ile kayıt bulunamadı.');
+        }
+
+        // Auth kontrolü - giriş yapılmışsa panel layout, yoksa guest layout
+        $isAuthenticated = auth()->check();
+
+        return Inertia::render('warranty/Show', [
+            'service' => (new ServiceInquiryResource($service))->resolve(),
+            'isAuthenticated' => $isAuthenticated,
         ]);
     }
 
@@ -76,7 +108,7 @@ class PublicInquiryController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => new ServiceInquiryResource($service),
+            'data' => (new ServiceInquiryResource($service))->resolve(),
         ]);
     }
 }

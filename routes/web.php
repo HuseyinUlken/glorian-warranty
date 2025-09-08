@@ -62,6 +62,7 @@ Route::prefix('api')->group(function () {
 Route::prefix('warranty')->name('warranty.')->group(function () {
     Route::get('/', [App\Http\Controllers\PublicInquiryController::class, 'index'])->name('check');
     Route::post('/check', [App\Http\Controllers\PublicInquiryController::class, 'check'])->name('check');
+    Route::get('/{code}', [App\Http\Controllers\PublicInquiryController::class, 'show'])->name('show');
 });
 
 // Garanti Takip Sistemi - Admin Rotaları

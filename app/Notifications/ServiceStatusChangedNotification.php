@@ -29,6 +29,7 @@ class ServiceStatusChangedNotification extends Notification implements ShouldQue
         $data = $this->getMailData();
 
         return (new MailMessage)
+            ->from(config('mail.from.address'), config('mail.from.name'))
             ->subject($data['title'])
             ->view('emails.service-status-changed', [
                 'service' => $this->service,

@@ -255,7 +255,7 @@ class ServiceController extends Controller
     /**
      * Hizmet güncelle
      */
-    public function update(UpdateServiceRequest $request, Service $service)
+public function update(UpdateServiceRequest $request, Service $service)
     {
         $authResult = $this->authorize('edit', 'service.edit');
         if ($authResult !== true) {
@@ -271,8 +271,26 @@ class ServiceController extends Controller
         try {
             DB::beginTransaction();
 
+            // Müşteri bilgilerini güncelle
+            $service->customer->update($request->input('customer'));
+
             // Hizmet bilgilerini güncelle
-            $service->update($request->validated());
+            $serviceData = $request->validated();
+            // Müşteri ve araç bilgilerini ayrı olarak işleyeceğimiz için kaldır
+            unset($serviceData['customer'], $serviceData['applied_products']);
+            
+            // Araç bilgilerini düzleştir
+            if ($request->has('vehicle')) {
+                $vehicleData = $request->input('vehicle');
+                $serviceData['vehicle_make'] = $vehicleData['make'];
+                $serviceData['vehicle_model'] = $vehicleData['model'];
+                $serviceData['vehicle_year'] = $vehicleData['year'];
+                $serviceData['vehicle_package'] = $vehicleData['package'];
+                $serviceData['vehicle_color'] = $vehicleData['color'];
+                $serviceData['vehicle_plate'] = $vehicleData['plate'];
+            }
+            
+            $service->update($serviceData);
 
             // Ürünleri güncelle
             if ($request->has('applied_products')) {
