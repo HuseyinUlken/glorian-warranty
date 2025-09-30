@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import AppliedAreasSelector from '@/components/ui/applied-areas-selector';
 import AppLayout from '@/layouts/app-layout';
 import { PermissionGuard } from '@/lib/permission/PermissionGuard';
 import Permissions from '@/lib/permission/modulePermissions';
@@ -236,9 +237,9 @@ export default function EditService({ service, products }: EditServiceProps) {
                 />
 
                 <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
                         {/* Müşteri ve Araç Bilgileri */}
-                        <Card className="md:col-span-2">
+                        <Card className="md:col-span-4">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <User className="h-5 w-5" />
@@ -482,52 +483,14 @@ export default function EditService({ service, products }: EditServiceProps) {
                                                             </Select>
                                                         </div>
 
-                                                        <div className="space-y-2">
-                                                            <Label>Uygulanan Alanlar *</Label>
-                                                            <Select
-                                                                value=""
-                                                                onValueChange={(value) => {
-                                                                    const currentAreas = product.applied_areas;
-                                                                    if (!currentAreas.includes(value)) {
-                                                                        updateProduct(index, 'applied_areas', [...currentAreas, value]);
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Alan seçin" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {getAppliedAreasOptions(product.product_id).map((area) => (
-                                                                        <SelectItem key={area} value={area}>
-                                                                            {area}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
-                                                            {Array.isArray(product.applied_areas) && product.applied_areas.length > 0 && (
-                                                                <div className="flex flex-wrap gap-1">
-                                                                    {product.applied_areas.map((area, areaIndex) => (
-                                                                        <Badge
-                                                                            key={areaIndex}
-                                                                            variant="secondary"
-                                                                            className="inline-flex items-center gap-1"
-                                                                        >
-                                                                            {area}
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => {
-                                                                                    const updatedAreas = product.applied_areas.filter((_, i) => i !== areaIndex);
-                                                                                    updateProduct(index, 'applied_areas', updatedAreas);
-                                                                                }}
-                                                                                className="ml-1 hover:text-destructive"
-                                                                            >
-                                                                                ×
-                                                                            </button>
-                                                                        </Badge>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                                        <AppliedAreasSelector
+                                                            productId={product.product_id}
+                                                            productName={products.find(p => p.id === product.product_id)?.name || ''}
+                                                            category={products.find(p => p.id === product.product_id)?.category || { value: '', label: '' }}
+                                                            appliedAreas={product.applied_areas}
+                                                            onAreasChange={(areas) => updateProduct(index, 'applied_areas', areas)}
+                                                            availableAreas={getAppliedAreasOptions(product.product_id)}
+                                                        />
                                                     </div>
 
                                                     <div className="space-y-2">
