@@ -22,6 +22,7 @@ class UpdateServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'service_code' => 'required|string|size:16|regex:/^[A-Z0-9]{16}$/',
             'application_date' => 'required|date|before_or_equal:today',
             'customer' => 'required|array',
             'customer.first_name' => 'required|string|max:255',
@@ -55,6 +56,9 @@ class UpdateServiceRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'service_code.required' => 'Hizmet kodu zorunludur.',
+            'service_code.size' => 'Hizmet kodu tam olarak 16 karakter olmalıdır.',
+            'service_code.regex' => 'Hizmet kodu sadece büyük harf ve rakam içerebilir.',
             'application_date.required' => 'Başvuru tarihi zorunludur.',
             'application_date.before_or_equal' => 'Başvuru tarihi bugünden sonra olamaz.',
             'customer.first_name.required' => 'Müşteri adı zorunludur.',

@@ -148,16 +148,18 @@ class ServiceController extends Controller
                 ]);
             }
 
-            // Hizmet kodu kontrolü
+            // Hizmet kodu kontrolü - zorunlu
             $serviceCode = $request->input('service_code');
-            if ($serviceCode) {
-                if (!Service::validateServiceCode($serviceCode)) {
-                    return back()->withErrors([
-                        'service_code' => 'Geçersiz hizmet kodu. 16 karakter olmalı ve benzersiz olmalıdır.'
-                    ]);
-                }
-            } else {
-                $serviceCode = Service::generateServiceCode();
+            if (!$serviceCode) {
+                return back()->withErrors([
+                    'service_code' => 'Hizmet kodu zorunludur.'
+                ]);
+            }
+            
+            if (!Service::validateServiceCode($serviceCode)) {
+                return back()->withErrors([
+                    'service_code' => 'Geçersiz hizmet kodu. 16 karakter olmalı ve benzersiz olmalıdır.'
+                ]);
             }
 
             // Hizmet oluştur
@@ -270,6 +272,23 @@ public function update(UpdateServiceRequest $request, Service $service)
 
         try {
             DB::beginTransaction();
+
+            // Hizmet kodu kontrolü - zorunlu
+            $serviceCode = $request->input('service_code');
+            if (!$serviceCode) {
+                return back()->withErrors([
+                    'service_code' => 'Hizmet kodu zorunludur.'
+                ]);
+            }
+            
+            // Eğer hizmet kodu değiştiyse benzersizlik kontrolü yap
+            if ($serviceCode !== $service->service_code) {
+                if (!Service::validateServiceCode($serviceCode)) {
+                    return back()->withErrors([
+                        'service_code' => 'Geçersiz hizmet kodu. 16 karakter olmalı ve benzersiz olmalıdır.'
+                    ]);
+                }
+            }
 
             // Müşteri bilgilerini güncelle
             $service->customer->update($request->input('customer'));

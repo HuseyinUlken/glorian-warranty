@@ -103,10 +103,16 @@ export default function CreateService({ products }: CreateServiceProps) {
             return;
         }
 
+        // Hizmet kodu kontrolü
+        if (!serviceCode || serviceCode.length !== 16) {
+            alert('Hizmet kodu 16 karakter olmalıdır.');
+            return;
+        }
+
         // Form data'yı hazırla
         const formData = {
             ...data,
-            service_code: serviceCode || undefined,
+            service_code: serviceCode,
             applied_products: validProducts,
         };
 
@@ -236,7 +242,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                                 placeholder="Müşteri adı"
                                                 required
                                             />
-                                            {errors['customer.first_name'] && <p className="text-sm text-red-500">{errors['customer.first_name']}</p>}
+                                            {(errors as any)['customer.first_name'] && <p className="text-sm text-red-500">{(errors as any)['customer.first_name']}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="customer.last_name">Soyad *</Label>
@@ -247,7 +253,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                                 placeholder="Müşteri soyadı"
                                                 required
                                             />
-                                            {errors['customer.last_name'] && <p className="text-sm text-red-500">{errors['customer.last_name']}</p>}
+                                            {(errors as any)['customer.last_name'] && <p className="text-sm text-red-500">{(errors as any)['customer.last_name']}</p>}
                                         </div>
                                     </div>
 
@@ -260,7 +266,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                             placeholder="0555 123 45 67"
                                             required
                                         />
-                                        {errors['customer.phone'] && <p className="text-sm text-red-500">{errors['customer.phone']}</p>}
+                                        {(errors as any)['customer.phone'] && <p className="text-sm text-red-500">{(errors as any)['customer.phone']}</p>}
                                     </div>
 
                                     <div className="space-y-2">
@@ -272,7 +278,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                             onChange={(e) => setData('customer', { ...data.customer, email: e.target.value })}
                                             placeholder="musteri@email.com"
                                         />
-                                        {errors['customer.email'] && <p className="text-sm text-red-500">{errors['customer.email']}</p>}
+                                        {(errors as any)['customer.email'] && <p className="text-sm text-red-500">{(errors as any)['customer.email']}</p>}
                                     </div>
 
                                     <div className="space-y-2">
@@ -284,7 +290,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                             placeholder="Müşteri adresi"
                                             rows={3}
                                         />
-                                        {errors['customer.address'] && <p className="text-sm text-red-500">{errors['customer.address']}</p>}
+                                        {(errors as any)['customer.address'] && <p className="text-sm text-red-500">{(errors as any)['customer.address']}</p>}
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
@@ -296,7 +302,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                                 onChange={(e) => setData('customer', { ...data.customer, city: e.target.value })}
                                                 placeholder="İstanbul"
                                             />
-                                            {errors['customer.city'] && <p className="text-sm text-red-500">{errors['customer.city']}</p>}
+                                            {(errors as any)['customer.city'] && <p className="text-sm text-red-500">{(errors as any)['customer.city']}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="customer.district">İlçe</Label>
@@ -306,7 +312,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                                 onChange={(e) => setData('customer', { ...data.customer, district: e.target.value })}
                                                 placeholder="Kadıköy"
                                             />
-                                            {errors['customer.district'] && <p className="text-sm text-red-500">{errors['customer.district']}</p>}
+                                            {(errors as any)['customer.district'] && <p className="text-sm text-red-500">{(errors as any)['customer.district']}</p>}
                                         </div>
                                     </div>
                                 </div>
@@ -324,7 +330,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                                 placeholder="BMW"
                                                 required
                                             />
-                                            {errors['vehicle.make'] && <p className="text-sm text-red-500">{errors['vehicle.make']}</p>}
+                                            {(errors as any)['vehicle.make'] && <p className="text-sm text-red-500">{(errors as any)['vehicle.make']}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="vehicle.model">Model *</Label>
@@ -335,7 +341,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                                 placeholder="X5"
                                                 required
                                             />
-                                            {errors['vehicle.model'] && <p className="text-sm text-red-500">{errors['vehicle.model']}</p>}
+                                            {(errors as any)['vehicle.model'] && <p className="text-sm text-red-500">{(errors as any)['vehicle.model']}</p>}
                                         </div>
                                     </div>
 
@@ -351,7 +357,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                                 max={new Date().getFullYear() + 1}
                                                 required
                                             />
-                                            {errors['vehicle.year'] && <p className="text-sm text-red-500">{errors['vehicle.year']}</p>}
+                                            {(errors as any)['vehicle.year'] && <p className="text-sm text-red-500">{(errors as any)['vehicle.year']}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="vehicle.color">Renk</Label>
@@ -361,7 +367,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                                 onChange={(e) => setData('vehicle', { ...data.vehicle, color: e.target.value })}
                                                 placeholder="Siyah"
                                             />
-                                            {errors['vehicle.color'] && <p className="text-sm text-red-500">{errors['vehicle.color']}</p>}
+                                            {(errors as any)['vehicle.color'] && <p className="text-sm text-red-500">{(errors as any)['vehicle.color']}</p>}
                                         </div>
                                     </div>
 
@@ -374,7 +380,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                                 onChange={(e) => setData('vehicle', { ...data.vehicle, package: e.target.value })}
                                                 placeholder="M Sport"
                                             />
-                                            {errors['vehicle.package'] && <p className="text-sm text-red-500">{errors['vehicle.package']}</p>}
+                                            {(errors as any)['vehicle.package'] && <p className="text-sm text-red-500">{(errors as any)['vehicle.package']}</p>}
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="vehicle.plate">Plaka</Label>
@@ -384,7 +390,7 @@ export default function CreateService({ products }: CreateServiceProps) {
                                                 onChange={(e) => setData('vehicle', { ...data.vehicle, plate: e.target.value })}
                                                 placeholder="34 ABC 123"
                                             />
-                                            {errors['vehicle.plate'] && <p className="text-sm text-red-500">{errors['vehicle.plate']}</p>}
+                                            {(errors as any)['vehicle.plate'] && <p className="text-sm text-red-500">{(errors as any)['vehicle.plate']}</p>}
                                         </div>
                                     </div>
                                 </div>
@@ -394,17 +400,18 @@ export default function CreateService({ products }: CreateServiceProps) {
                                     <h4 className="font-medium">Hizmet Bilgileri</h4>
                                     
                                     <div className="space-y-2">
-                                        <Label htmlFor="service_code">Hizmet Kodu (Opsiyonel)</Label>
+                                        <Label htmlFor="service_code">Hizmet Kodu *</Label>
                                         <Input
                                             id="service_code"
                                             value={serviceCode}
                                             onChange={(e) => setServiceCode(e.target.value.toUpperCase())}
-                                            placeholder="16 haneli kod (boş bırakılırsa otomatik oluşturulur)"
+                                            placeholder="16 haneli kod girin"
                                             maxLength={16}
                                             pattern="[A-Z0-9]{16}"
+                                            required
                                         />
                                         <p className="text-sm text-muted-foreground">
-                                            {serviceCode.length}/16 karakter
+                                            {serviceCode.length}/16 karakter - Sadece büyük harf ve rakam kullanın
                                         </p>
                                         {errors.service_code && <p className="text-sm text-red-500">{errors.service_code}</p>}
                                     </div>
