@@ -58,7 +58,6 @@ export default function CreateService({ products }: CreateServiceProps) {
         notes?: string;
     }>>([]);
     
-    const [serviceCode, setServiceCode] = useState('');
 
     const { data, setData, post, processing, errors } = useForm({
         service_code: '',
@@ -105,17 +104,12 @@ export default function CreateService({ products }: CreateServiceProps) {
         }
 
         // Hizmet kodu kontrolü
-        if (!serviceCode || serviceCode.length !== 16) {
+        if (!data.service_code || data.service_code.length !== 16) {
             alert('Hizmet kodu 16 karakter olmalıdır.');
             return;
         }
 
-        // Form data'yı hazırla
-        const formData = {
-            ...data,
-            service_code: serviceCode,
-            applied_products: validProducts,
-        };
+      
 
 
         post(route('dealer.services.store'), {
@@ -404,15 +398,15 @@ export default function CreateService({ products }: CreateServiceProps) {
                                         <Label htmlFor="service_code">Hizmet Kodu *</Label>
                                         <Input
                                             id="service_code"
-                                            value={serviceCode}
-                                            onChange={(e) => setServiceCode(e.target.value.toUpperCase())}
+                                            value={data.service_code}
+                                            onChange={(e) => setData('service_code', e.target.value.toUpperCase())}
                                             placeholder="16 haneli kod girin"
                                             maxLength={16}
                                             pattern="[A-Z0-9]{16}"
                                             required
                                         />
                                         <p className="text-sm text-muted-foreground">
-                                            {serviceCode.length}/16 karakter - Sadece büyük harf ve rakam kullanın
+                                            {data.service_code.length}/16 karakter - Sadece büyük harf ve rakam kullanın
                                         </p>
                                         {errors.service_code && <p className="text-sm text-red-500">{errors.service_code}</p>}
                                     </div>
